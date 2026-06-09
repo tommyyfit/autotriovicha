@@ -1,62 +1,121 @@
-/* Globální úprava admin pozadí a písma */
+/* ==========================================================================
+   KOMPLETNÍ UI/UX RESET PRO EDITAČNÍ OKNO (AUTOTRIO VÍCHA)
+   ========================================================================== */
+
+/* Globální pozadí celé administrace */
 body {
-  background-color: #f1f5f9 !important;
+  background-color: #f8fafc !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-/* Úprava editačních polí (skrytí ošklivých šedých lišt) */
+/* Vyčištění hlavního editačního kontejneru (levá strana) */
 .css-11oz9v7-ControlPaneContainer {
   background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
-  padding: 24px !important;
-  border: 1px solid #e2e8f0 !important;
-  margin-bottom: 24px !important;
+  padding: 32px !important;
+  max-width: 800px !important;
+  margin: 40px auto !important;
 }
 
-/* Horní lišta s labelem */
+/* ÚPLNÝ RESET ŠEDÝCH BOXŮ U LABELŮ */
+label[class*="ControlLabel"], 
 .css-839g74-ControlLabel {
   background-color: transparent !important;
+  border: none !important;
   color: #0f172a !important;
+  font-size: 14px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
-  font-size: 13px !important;
   margin-bottom: 8px !important;
-  border: none !important;
+  padding: 0 !important;
 }
 
-/* Samotné inputy a textarey */
-input[type="text"], textarea, .css-w77b3-GridControl {
+/* Vyčištění nápovědy (hintů pod políčky) */
+div[class*="FieldHint"], 
+.css-14v0ic8-FieldHint {
+  color: #64748b !important;
+  font-size: 12px !important;
+  margin-top: 6px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+}
+
+/* ==========================================================================
+   VYČIŠTĚNÍ TEXT EDITORU (OBSAH ČLÁNKU)
+   ========================================================================== */
+
+/* Odstranění té hnusné šedé plochy pod editorem */
+div[class*="RichTextControl"], 
+.css-14406n0-RichTextControl {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Lišta s nástroji editoru (B, I, odkaz atd.) */
+div[class*="ToolbarContainer"] {
+  background-color: #f1f5f9 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 6px !important;
+}
+
+/* Samotná plocha, kam se píše text článku */
+div[class*="VisualEditorContainer"], 
+.EditorArea, 
+.ProseMirror {
+  background-color: #ffffff !important; /* Totálně bílé čisté pozadí */
+  color: #334155 !important;
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  padding: 20px !important;
+  min-height: 300px !important;
+}
+
+/* ==========================================================================
+   INPUTY (NADPIS, PEREX, OBRÁZEK)
+   ========================================================================== */
+
+/* Čistý design pro jednořádkové inputy a textarey */
+input[type="text"], 
+textarea, 
+div[class*="GridControl"] {
   border: 1px solid #cbd5e1 !important;
   border-radius: 10px !important;
-  background-color: #f8fafc !important;
+  background-color: #ffffff !important;
   padding: 12px 16px !important;
   font-size: 15px !important;
   color: #1e293b !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.2s ease-in-out !important;
+  width: 100% !important;
 }
 
-input[type="text"]:focus, textarea:focus {
+/* Focus stavy pro moderní pocit z psaní */
+input[type="text"]:focus, 
+textarea:focus, 
+.ProseMirror:focus {
   border-color: #2563eb !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
   outline: none !important;
 }
 
-/* Vizuální oddělovače z config.yml (ty hidden sekce s čárou) */
-.css-14v0ic8-FieldHint {
-  color: #3b82f6 !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.1em !important;
-}
-
-/* Hlavní tlačítko Publikovat */
-.css-12shm1a-Toolbar-button-btn-text-btn-success {
-  background-color: #2563eb !important;
+/* Tlačítko pro výběr úvodního obrázku */
+button[class*="UploadButton"] {
+  background-color: #f1f5f9 !important;
+  border: 2px dashed #cbd5e1 !important;
+  color: #475569 !important;
   border-radius: 10px !important;
   font-weight: 700 !important;
-  transition: background 0.2s !important;
+  padding: 16px !important;
+  transition: all 0.2s !important;
 }
-.css-12shm1a-Toolbar-button-btn-text-btn-success:hover {
-  background-color: #1d4ed8 !important;
+
+button[class*="UploadButton"]:hover {
+  background-color: #e2e8f0 !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
 }

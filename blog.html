@@ -165,22 +165,17 @@
 <script>
 let lokalniClanky = [];
 
-// ─────────────────────────────────────────────
-// Bezpečný frontmatter parser
-// ─────────────────────────────────────────────
+// Pomocná funkce pro vytažení dat z frontmatteru (YAML bloku na začátku souboru)
 function parseFrontmatterLine(line) {
     const trimmed = line.trim();
     const colonIndex = trimmed.indexOf(':');
     if (colonIndex === -1) return { key: null, value: null };
     const key = trimmed.slice(0, colonIndex).trim();
     let value = trimmed.slice(colonIndex + 1).trim();
-    value = value.replace(/^["']|["']$/g, '');
+    value = value.replace(/^["']|["']$/g, ''); // odstranění uvozovek
     return { key, value };
 }
 
-// ─────────────────────────────────────────────
-// Bezpečný frontmatter split
-// ─────────────────────────────────────────────
 function splitFrontmatter(rawText) {
     const text = rawText.replace(/\r\n/g, '\n');
     const delimiter = /^---\s*$/m;
@@ -195,9 +190,7 @@ function splitFrontmatter(rawText) {
     return { meta, body };
 }
 
-// ─────────────────────────────────────────────
-// Načtení seznamu článků z lokálního clanky.json
-// ─────────────────────────────────────────────
+// Hlavní funkce pro načtení článků z vygenerovaného JSONu
 async function loadBlog() {
     const grid = document.getElementById('blog-grid');
     if (!grid) return;
@@ -205,13 +198,7 @@ async function loadBlog() {
 
     try {
         const response = await fetch('/clanky.json');
-        
-        if (!response.ok) {
-            grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">
-                Články se nepodařilo načíst. Zkuste obnovit stránku.
-            </p>`;
-            return;
-        }
+        if (!response.ok) throw new Error('Nelze načíst clanky.json');
 
         lokalniClanky = await response.json();
 
@@ -220,45 +207,45 @@ async function loadBlog() {
             return;
         }
 
+        // Vykreslení karet
         lokalniClanky.forEach(clanek => {
             renderCard(clanek);
         });
 
     } catch (error) {
-        console.error("Kritická chyba při načítání blogu:", error);
+        console.error("Chyba:", error);
         grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">Nepodařilo se načíst články. Zkuste obnovit stránku.</p>`;
     }
 }
 
-// ─────────────────────────────────────────────
-// Vykreslení jedné karty
-// ─────────────────────────────────────────────
 function renderCard(clanek) {
     const grid = document.getElementById('blog-grid');
-    
     const { meta } = splitFrontmatter(clanek.obsah);
     const metadataLines = meta.split('\n');
 
     let title = 'Bez názvu';
     let description = '';
-    let image = 'public/hero3.jpg';
+    let image = 'public/hero3.jpg'; // Výchozí fotka
     let dateRaw = '';
 
     metadataLines.forEach(line => {
         const { key, value } = parseFrontmatterLine(line);
         if (!key) return;
-        if (key === 'title') title = value || 'Bez názvu';
-        else if (key === 'description') description = value || '';
-        else if (key === 'image') image = value || '';
-        else if (key === 'date') dateRaw = value || '';
+        if (key === 'title') title = value;
+        else if (key === 'description') description = value;
+        else if (key === 'image') image = value;
+        else if (key === 'date') dateRaw = value;
     });
 
-    if (!image || image === 'undefined') image = 'public/hero3.jpg';
+    // POZOR: CMS ukládá obrázky jako "/img/blog/foto.jpg". 
+    // Ve tvé struktuře jsou ale v "public/img/blog/foto.jpg", takže pokud cesta začíná "/img", přidáme "public"
+    if (image && image.startsWith('/img/')) {
+        image = 'public' + image;
+    } else if (!image || image === 'undefined') {
+        image = 'public/hero3.jpg';
+    }
 
-    const date = dateRaw
-        ? new Date(dateRaw).toLocaleDateString('cs-CZ')
-        : new Date().toLocaleDateString('cs-CZ');
-
+    const date = dateRaw ? new Date(dateRaw).toLocaleDateString('cs-CZ') : new Date().toLocaleDateString('cs-CZ');
     const safeTitle = title.replace(/"/g, '&quot;').replace(/</g, '&lt;');
     const safeSlug = encodeURIComponent(clanek.slug);
 
@@ -289,53 +276,30 @@ function renderCard(clanek) {
     grid.appendChild(card);
 }
 
-// ─────────────────────────────────────────────
-// Otevření článku v modalu
-// ─────────────────────────────────────────────
-let modalIsLoading = false;
-
 function openArticle(slug) {
-    if (modalIsLoading) return;
-    modalIsLoading = true;
-
     const modal = document.getElementById('article-modal');
     const content = document.getElementById('modal-content');
-
     const clanek = lokalniClanky.find(c => c.slug === slug);
 
-    if (!clanek) {
-        content.innerHTML = `<p class="text-slate-500 text-center py-12">Článek se nepodařilo najít.</p>`;
-        modalIsLoading = false;
-        return;
-    }
+    if (!clanek) return;
 
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    try {
-        const { body } = splitFrontmatter(clanek.obsah);
-        content.innerHTML = marked.parse(body);
-    } catch (error) {
-        content.innerHTML = `<p class="text-slate-500 text-center py-12">Chyba při zpracování obsahu článku.</p>`;
-        console.error("Nelze otevřít detail článku:", error);
-    } finally {
-        modalIsLoading = false;
-    }
+    // VYČIŠTĚNÍ MARKDOWNU: Rozdělíme kód a tělo pošleme přes marked.parse()
+    const { body } = splitFrontmatter(clanek.obsah);
+    
+    // Použijeme knihovnu Marked pro převod mřížek na nadpisy atd.
+    content.innerHTML = marked.parse(body);
 }
 
-// ─────────────────────────────────────────────
-// Zavření modalu
-// ─────────────────────────────────────────────
 function closeModal() {
     document.getElementById('article-modal').classList.add('hidden');
     document.body.style.overflow = '';
-    modalIsLoading = false;
 }
 
 function handleModalBackdropClick(event) {
-    if (event.target === document.getElementById('article-modal')) {
-        closeModal();
-    }
+    if (event.target === document.getElementById('article-modal')) closeModal();
 }
 
 document.addEventListener('keydown', function(e) {
