@@ -151,12 +151,18 @@
     </div>
 </section>
 
-<div id="article-modal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4" onclick="handleModalBackdropClick(event)">
-    <div id="modal-inner" class="bg-white border border-slate-200 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto overflow-x-hidden relative shadow-2xl">
-        <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 p-2.5 rounded-xl transition-all cursor-pointer z-50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+<div id="article-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6" onclick="handleModalBackdropClick(event)">
+    <div id="modal-inner" class="bg-white border border-slate-200 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto relative shadow-2xl transition-all duration-300 transform scale-100">
+        
+        <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 p-2.5 rounded-xl transition-all cursor-pointer z-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
         </button>
-        <div id="modal-content" class="p-6 sm:p-10 text-slate-800 prose prose-slate max-w-none"></div>
+
+        <div id="modal-content" class="p-6 sm:p-12 text-slate-800 prose prose-slate prose-headings:uppercase prose-headings:font-black prose-headings:tracking-tight prose-h2:text-2xl prose-h2:text-slate-900 prose-p:leading-relaxed prose-p:text-slate-600 prose-li:text-slate-600 max-w-none">
+            </div>
+
     </div>
 </div>
 
