@@ -10,12 +10,33 @@
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     
     <script>
-      // Toto je kritické: když se uživatel přihlásí, stránka se obnoví a pustí ho dál
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
+      // 1. Inicializace a kontrola přihlášení / přesměrování
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+
+        // Přesměrování při odhlášení zpět na hlavní stránku administrace
+        window.netlifyIdentity.on("logout", () => {
+          document.location.href = "/admin/";
+        });
+      }
+
+      // 2. BRUTÁLNÍ FIX PRO LINKY Z E-MAILU (Invite / Reset hesla)
+      // Pokud URL obsahuje token z e-mailu, okamžitě natvrdo otevřeme přihlašovací okno
+      document.addEventListener("DOMContentLoaded", () => {
+        const hash = window.location.hash;
+        if (hash && (hash.includes("invite_token") || hash.includes("recovery_token"))) {
+          // Krátká pauza, aby se stihl widget inicializovat v DOMu
+          setTimeout(() => {
+            if (window.netlifyIdentity) {
+              window.netlifyIdentity.open();
+            }
+          }, 500);
         }
       });
     </script>

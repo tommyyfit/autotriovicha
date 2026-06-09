@@ -2,24 +2,71 @@ backend:
   name: git-gateway
   branch: main
 
-# Kam se ukládají obrázky nahrané v CMS
-media_folder: "public"
-public_folder: "/public"
+# Správa médií - obrázky se ukládají do správné složky, ale v MD bude čistá cesta
+media_folder: "public/img/blog"
+public_folder: "/img/blog"
 
-# Zobrazení v editoru
+# Nastavení editoru
 locale: cs
+show_preview_links: false
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
 
 collections:
   - name: "blog"
-    label: "Články na blogu"
+    label: "✍️ Články na blogu"
     label_singular: "Článek"
     folder: "blog"
     create: true
+    format: "frontmatter"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    preview_path: "blog.html"
+    
+    # Přehledná tabulka v administraci
+    summary: "{{title}} ({{date}})"
+    sortable_fields: ["date", "title"]
+
     fields:
-      - { label: "Nadpis článku", name: "title", widget: "string" }
-      - { label: "Datum publikace", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
-      - { label: "Stručný popis", name: "description", widget: "text" }
-      - { label: "Hlavní obrázek", name: "image", widget: "image", required: false }
-      - { label: "Obsah článku", name: "body", widget: "markdown" }
+      - label: "📌 Nadpis článku"
+        name: "title"
+        widget: "string"
+        required: true
+        hint: "Hlavní titulek článku, který upoutá pozornost."
+
+      - label: "📅 Datum publikace"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: true
+
+      - label: "📝 Stručný popis (Perex)"
+        name: "description"
+        widget: "text"
+        required: true
+        hint: "Krátké shrnutí (1-2 věty), které se zobrazí na úvodní stránce blogu."
+
+      - label: "🖼️ Hlavní obrázek"
+        name: "image"
+        widget: "image"
+        required: false
+        choose_url: false
+        hint: "Doporučený formát: WEBP/JPG. Pokud nevyplníte, použije se výchozí foto."
+
+      - label: "📖 Obsah článku"
+        name: "body"
+        widget: "markdown"
+        required: true
+        minimal: false
+        buttons:
+          - bold
+          - italic
+          - code
+          - link
+          - heading-two
+          - heading-three
+          - quote
+          - bulleted-list
+          - numbered-list
