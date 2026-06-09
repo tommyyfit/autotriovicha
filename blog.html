@@ -1,463 +1,755 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Služby | Autoservis Autotrio Vícha s.r.o.</title>
+    <title>Blog a novinky z dílny | Autoservis Autotrio Vícha s.r.o.</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -5px rgba(2, 6, 23, 0.05), 0 20px 40px -10px rgba(2, 6, 23, 0.03)',
+                        'neon': '0 0 20px rgba(37, 99, 235, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Plynulý přechod blur efektu na pozadí modálu */
+        .modal-backdrop-blur {
+            backdrop-filter: blur(0px);
+            transition: backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
+        }
+        .modal-backdrop-blur.active {
+            backdrop-filter: blur(16px);
+        }
+        
+        /* Custom lišta pro scrollování uvnitř článku */
+        #modal-inner::-webkit-scrollbar {
+            width: 6px;
+        }
+        #modal-inner::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #modal-inner::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        #modal-inner::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Jemná pulsace pro skeleton loadery */
+        @keyframes customPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+        .animate-skeleton {
+            animation: customPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Stylování odkazů a silných prvků generovaných z Markdownu */
+        .prose-custom a {
+            color: #2563eb !important;
+            text-decoration: underline !important;
+            font-weight: 700 !important;
+            transition: color 0.15s ease;
+        }
+        .prose-custom a:hover {
+            color: #1d4ed8 !important;
+        }
+        .prose-custom strong {
+            color: inherit !important;
+            font-weight: 800 !important;
+        }
+    </style>
 </head>
 
-<body class="bg-white text-slate-800 font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
 
-    <header class="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md">
+    <header class="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md transition-all duration-300">
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-            <a href="index.html"
-                class="group flex items-center gap-4 rounded-xl focus-visible:outline-none select-none">
-                <div
-                    class="flex items-center justify-center w-11 h-11 bg-slate-800 border border-slate-700/60 rounded-xl shadow-inner transition-all duration-300 group-hover:border-blue-500/50 group-hover:bg-slate-800/80">
-                    <svg class="w-6 h-6 text-blue-500 transition-transform duration-700 ease-out group-hover:rotate-[180deg] group-hover:text-blue-400"
-                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3" fill="currentColor"
-                            class="text-blue-600 group-hover:text-blue-500 transition-colors" />
+            <a href="index.html" class="group flex items-center gap-4 rounded-xl focus:visible:outline-none select-none">
+                <div class="flex items-center justify-center w-11 h-11 bg-slate-800 border border-slate-700/60 rounded-xl shadow-inner transition-all duration-300 group-hover:border-blue-500/50 group-hover:bg-slate-800/80">
+                    <svg class="w-6 h-6 text-blue-500 transition-transform duration-700 ease-out group-hover:rotate-[180deg]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3" fill="currentColor" class="text-blue-600 group-hover:text-blue-500 transition-colors" />
                         <circle cx="12" cy="12" r="9" />
-                        <path stroke-linecap="round"
-                            d="M12 3v3M12 18v3M3 12h3M18 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12" />
+                        <path stroke-linecap="round" d="M12 3v3M12 18v3M3 12h3M18 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12" />
                     </svg>
                 </div>
                 <div class="flex flex-col justify-center">
-                    <span
-                        class="text-lg font-black uppercase tracking-tight text-white transition-colors duration-300 group-hover:text-blue-400 leading-none">
-                        AUTOTRIO <span
-                            class="text-blue-500 group-hover:text-white transition-colors duration-300">VÍCHA</span>
+                    <span class="text-lg font-black uppercase tracking-tight text-white transition-colors duration-300 group-hover:text-blue-400 leading-none">
+                        AUTOTRIO <span class="text-blue-500 group-hover:text-white transition-colors duration-300">VÍCHA</span>
                     </span>
-                    <span
-                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 transition-colors duration-300 group-hover:text-blue-500/80">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 transition-colors duration-300 group-hover:text-blue-500/80">
                         Bystřice nad Pernštejnem
                     </span>
                 </div>
             </a>
 
             <nav class="hidden md:flex items-center gap-2">
-                <a href="index.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    Úvod
+                <a href="index.html" class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200">Úvod</a>
+                <a href="sluzby.html" class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200">Služby</a>
+                <a href="blog.html" class="rounded-xl px-4 py-2.5 text-sm font-black uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 transition-all flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>Blog
                 </a>
-                <a href="sluzby.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    Služby
-                </a>
-                <a href="blog.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-black uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 transition-all flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                    Blog
-                </a>
-                <a href="faq.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">
-                    FAQ
-                </a>
+                <a href="faq.html" class="rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">FAQ</a>
                 <div class="ml-4">
-                <a href="kontakt.html"
-                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 shadow-lg shadow-blue-600/20">
-                        Kontakt
-                    </a>
+                    <a href="kontakt.html" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 shadow-lg shadow-blue-600/20">Kontakt</a>
                 </div>
             </nav>
 
-            <button id="mobile-menu-btn" type="button"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white md:hidden transition-colors">
+            <button id="mobile-menu-btn" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white md:hidden transition-colors" aria-label="Menu">
                 <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
         </div>
 
         <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900 px-4 py-4 space-y-1">
-            <a href="index.html"
-                class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">Úvod</a>
-            <a href="sluzby.html"
-                class="block rounded-xl bg-blue-500/10 px-4 py-3 text-sm font-black uppercase tracking-wider text-blue-400">Služby</a>
-            <a href="blog.html"
-                class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">Blog</a>
-            <a href="faq.html"
-                class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">FAQ</a>
+            <a href="index.html" class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">Úvod</a>
+            <a href="sluzby.html" class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">Služby</a>
+            <a href="blog.html" class="block rounded-xl bg-blue-500/10 px-4 py-3 text-sm font-black uppercase tracking-wider text-blue-400">Blog</a>
+            <a href="faq.html" class="block rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-slate-300 hover:bg-slate-800 hover:text-white">FAQ</a>
             <div class="pt-4 pb-2 px-2">
-                <a href="kontakt.html"
-                    class="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-xs font-black uppercase tracking-widest text-white">Kontakt</a>
+                <a href="kontakt.html" class="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3.5 text-xs font-black uppercase tracking-widest text-white">Kontakt</a>
             </div>
         </div>
     </header>
 
-<section class="relative bg-slate-900 py-32 lg:py-48 overflow-hidden flex items-center min-h-[90vh]">
 
-    <div class="absolute inset-0 z-0">
-        <img src="public/hero3.jpg" alt="Autoservis Autotrio Vícha - Blog a novinky"
-            class="w-full h-full object-cover object-center opacity-50 scale-105 transition-transform duration-1000">
-
-        <div class="absolute inset-0"
-            style="background: linear-gradient(to right, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 0.85) 50%, transparent 100%);">
-        </div>
-        <div class="absolute inset-0"
-            style="background: linear-gradient(to top, rgba(2, 6, 23, 0.6) 0%, transparent 100%);"></div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <div class="max-w-3xl">
-
-            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black text-white uppercase tracking-tight leading-[1.05] mb-6">
-                Píšeme o tom,<br>
-                <span class="text-blue-500">co v servisu reálně řešíme.</span>
-            </h1>
-
-            <p class="text-base sm:text-lg lg:text-xl text-slate-200 font-normal leading-relaxed mb-10 max-w-2xl">
-                Nenajdete tu žádné obecné články stažené z internetu. Chceme vám jednoduše a srozumitelně ukázat, jak se o auto starat, na co si dát pozor při opravách a jaké technické špeky nám zrovna stojí na zvedáku v Bystřici.
-            </p>
-
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                <a href="#vypis-clanku"
-                    class="group relative inline-block bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-wider text-sm px-8 py-4 rounded-xl text-center transition-all duration-300 shadow-xl shadow-slate-950 hover:-translate-y-0.5 transform cursor-pointer">
-                    Kouknout na články
-                </a>
-
-                <a href="kontakt.html#kontakt-formular"
-                    class="bg-slate-950/80 hover:bg-slate-950 text-slate-200 hover:text-white font-bold uppercase tracking-wider text-sm px-8 py-4 rounded-xl text-center border border-slate-800 hover:border-slate-700 transition-all duration-300 backdrop-blur-sm cursor-pointer">
-                    Zeptejte se na váš vůz
-                </a>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<section id="vypis-clanku" class="bg-white py-24 sm:py-32 relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        <div class="mb-12 md:mb-16">
-            <h2 class="text-3xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight">
-                Nejnovější <span class="text-blue-600">příspěvky</span>
-            </h2>
-            <p class="text-slate-600 mt-4 max-w-xl text-sm sm:text-base">
-                Skutečné případy z naší dílny, rady pro údržbu a technické zajímavosti.
-            </p>
+    <section class="relative bg-slate-950 py-36 lg:py-48 overflow-hidden flex items-center">
+        <div class="absolute inset-0 z-0 select-none pointer-events-none">
+            <img src="public/hero3.jpg" alt="Autoservis Autotrio Vícha" class="w-full h-full object-cover object-center opacity-35 scale-105 transition-transform duration-[2000ms]">
+            <div class="absolute inset-0" style="background: linear-gradient(to right, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 0.85) 50%, transparent 100%);"></div>
+            <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(2, 6, 23, 0.8) 0%, transparent 100%);"></div>
         </div>
 
-        <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div class="text-slate-400 animate-pulse col-span-full text-center py-12">
-                Načítám nejnovější články z dílny...
-            </div>
-        </div>
-    </div>
-</section>
-
-<div id="article-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6" onclick="handleModalBackdropClick(event)">
-    <div id="modal-inner" class="bg-white border border-slate-200 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto relative shadow-2xl transition-all duration-300 transform scale-100">
-        
-        <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 p-2.5 rounded-xl transition-all cursor-pointer z-50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
-
-        <div id="modal-content" class="p-6 sm:p-12 text-slate-800 prose prose-slate prose-headings:uppercase prose-headings:font-black prose-headings:tracking-tight prose-h2:text-2xl prose-h2:text-slate-900 prose-p:leading-relaxed prose-p:text-slate-600 prose-li:text-slate-600 max-w-none">
-            </div>
-
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<script>
-let lokalniClanky = [];
-
-// Pomocná funkce pro vytažení dat z frontmatteru (YAML bloku na začátku souboru)
-function parseFrontmatterLine(line) {
-    const trimmed = line.trim();
-    const colonIndex = trimmed.indexOf(':');
-    if (colonIndex === -1) return { key: null, value: null };
-    const key = trimmed.slice(0, colonIndex).trim();
-    let value = trimmed.slice(colonIndex + 1).trim();
-    value = value.replace(/^["']|["']$/g, ''); // odstranění uvozovek
-    return { key, value };
-}
-
-function splitFrontmatter(rawText) {
-    const text = rawText.replace(/\r\n/g, '\n');
-    const delimiter = /^---\s*$/m;
-    const first = text.search(delimiter);
-    if (first === -1) return { meta: '', body: text };
-    const afterFirst = text.indexOf('\n', first) + 1;
-    const second = text.slice(afterFirst).search(delimiter);
-    if (second === -1) return { meta: '', body: text };
-    const metaEnd = afterFirst + second;
-    const meta = text.slice(afterFirst, metaEnd);
-    const body = text.slice(text.indexOf('\n', metaEnd) + 1);
-    return { meta, body };
-}
-
-// Hlavní funkce pro načtení článků z vygenerovaného JSONu
-async function loadBlog() {
-    const grid = document.getElementById('blog-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    try {
-        const response = await fetch('/clanky.json');
-        if (!response.ok) throw new Error('Nelze načíst clanky.json');
-
-        lokalniClanky = await response.json();
-
-        if (lokalniClanky.length === 0) {
-            grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">Zatím jsme nenapsali žádný článek.</p>`;
-            return;
-        }
-
-        // Vykreslení karet
-        lokalniClanky.forEach(clanek => {
-            renderCard(clanek);
-        });
-
-    } catch (error) {
-        console.error("Chyba:", error);
-        grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">Nepodařilo se načíst články. Zkuste obnovit stránku.</p>`;
-    }
-}
-
-function renderCard(clanek) {
-    const grid = document.getElementById('blog-grid');
-    const { meta } = splitFrontmatter(clanek.obsah);
-    const metadataLines = meta.split('\n');
-
-    let title = 'Bez názvu';
-    let description = '';
-    let image = 'public/hero3.jpg'; // Výchozí fotka
-    let dateRaw = '';
-
-    metadataLines.forEach(line => {
-        const { key, value } = parseFrontmatterLine(line);
-        if (!key) return;
-        if (key === 'title') title = value;
-        else if (key === 'description') description = value;
-        else if (key === 'image') image = value;
-        else if (key === 'date') dateRaw = value;
-    });
-
-    // POZOR: CMS ukládá obrázky jako "/img/blog/foto.jpg". 
-    // Ve tvé struktuře jsou ale v "public/img/blog/foto.jpg", takže pokud cesta začíná "/img", přidáme "public"
-    if (image && image.startsWith('/img/')) {
-        image = 'public' + image;
-    } else if (!image || image === 'undefined') {
-        image = 'public/hero3.jpg';
-    }
-
-    const date = dateRaw ? new Date(dateRaw).toLocaleDateString('cs-CZ') : new Date().toLocaleDateString('cs-CZ');
-    const safeTitle = title.replace(/"/g, '&quot;').replace(/</g, '&lt;');
-    const safeSlug = encodeURIComponent(clanek.slug);
-
-    const card = document.createElement('div');
-    card.className = "group bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:border-blue-600/50 hover:bg-white transition-all duration-300 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transform";
-    card.innerHTML = `
-        <div>
-            <div class="relative aspect-video overflow-hidden bg-slate-200">
-                <img src="${image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='public/hero3.jpg'">
-            </div>
-            <div class="p-6">
-                <div class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">${date}</div>
-                <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">${safeTitle}</h3>
-                <p class="text-slate-600 text-sm mt-3 leading-relaxed line-clamp-3">${description}</p>
-            </div>
-        </div>
-        <div class="p-6 pt-0">
-            <button data-slug="${safeSlug}" class="btn-read-article inline-flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition-colors duration-200 cursor-pointer bg-transparent border-0 p-0">
-                Číst článek <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </button>
-        </div>
-    `;
-
-    card.querySelector('.btn-read-article').addEventListener('click', function() {
-        openArticle(decodeURIComponent(this.dataset.slug));
-    });
-
-    grid.appendChild(card);
-}
-
-function openArticle(slug) {
-    const modal = document.getElementById('article-modal');
-    const content = document.getElementById('modal-content');
-    const clanek = lokalniClanky.find(c => c.slug === slug);
-
-    if (!clanek) return;
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-
-    // VYČIŠTĚNÍ MARKDOWNU: Rozdělíme kód a tělo pošleme přes marked.parse()
-    const { body } = splitFrontmatter(clanek.obsah);
-    
-    // Použijeme knihovnu Marked pro převod mřížek na nadpisy atd.
-    content.innerHTML = marked.parse(body);
-}
-
-function closeModal() {
-    document.getElementById('article-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function handleModalBackdropClick(event) {
-    if (event.target === document.getElementById('article-modal')) closeModal();
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
-});
-
-document.addEventListener('DOMContentLoaded', loadBlog);
-</script>
-
-    <footer class="bg-slate-900 border-t border-slate-950 text-slate-400 pt-16 pb-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            <div class="border-b border-slate-800 pb-12 mb-16 text-center">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest block mb-8">naši partneři:</h3>
-                <div class="flex flex-wrap justify-center items-center gap-12 lg:gap-20">
-                    <a href="https://odemceniauta.cz" target="_blank" rel="noopener noreferrer"
-                        class="opacity-80 hover:opacity-100 transition-opacity max-w-[180px] block">
-                        <img src="public/odemceniautacz.png" alt="OdemčeníAuta.cz" class="h-10 w-auto object-contain">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-wider mb-6">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+                    Články, postupy a know-how
+                </div>
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black text-white uppercase tracking-tight leading-[1.05] mb-6">
+                    Zákulisí servisu,<br>
+                    <span class="text-blue-500">kterému věříte.</span>
+                </h1>
+                <p class="text-base sm:text-lg lg:text-xl text-slate-300 font-normal leading-relaxed mb-10 max-w-2xl">
+                    Ukazujeme naši reálnou práci. Přečtěte si praktické tipy pro správnou údržbu vozidla, návody jak předejít drahým poruchám a technické rozbory přímo z naší dílny v Bystřici.
+                </p>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    <a href="#vypis-sekce" class="group bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-wider text-sm px-8 py-4 rounded-xl text-center transition-all duration-300 shadow-xl shadow-blue-950/50 hover:-translate-y-0.5 transform cursor-pointer">
+                        Číst články
                     </a>
-                    <a href="https://zariveauto.cz" target="_blank" rel="noopener noreferrer"
-                        class="opacity-80 hover:opacity-100 transition-opacity max-w-[180px] block">
-                        <img src="public/zariveautocz.png" alt="ZářivéAuto.cz" class="h-10 w-auto object-contain">
+                    <a href="kontakt.html#kontakt-formular" class="bg-slate-900/80 hover:bg-slate-900 text-slate-200 hover:text-white font-bold uppercase tracking-wider text-sm px-8 py-4 rounded-xl text-center border border-slate-800 hover:border-slate-700 transition-all duration-300 backdrop-blur-sm cursor-pointer">
+                        Konzultovat závadu
                     </a>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 xl:gap-16 mb-16">
 
-                <div class="flex flex-col items-start space-y-4">
-                    <div class="h-12 flex items-center justify-center">
-                        <img src="public/autotrio.png" alt="Autotrio Vícha s.r.o." class="h-full w-auto object-contain">
-                    </div>
-                    <p class="text-xs text-slate-400 leading-relaxed max-w-xs pt-1">
-                        Kompletní profesionální péče o vozy všech značek, lakýrnické práce a pokročilé technologické
-                        úkony v Bystřici nad Pernštejnem.
+    <main id="vypis-sekce" class="bg-slate-50 py-20 lg:py-28 relative flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12 pb-8 border-b border-slate-200">
+                <div>
+                    <h2 class="text-3xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight">
+                        Firemní <span class="text-blue-600">magazín</span>
+                    </h2>
+                    <p class="text-slate-600 mt-2 max-w-xl text-sm sm:text-base">
+                        Filtrujte příspěvky podle kategorií nebo vyhledejte konkrétní téma, které vás zajímá.
                     </p>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="border-l-2 border-blue-500 pl-3">
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest">Provozní doba</h4>
-                    </div>
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <span
-                                class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-0.5">Pracovní
-                                dny</span>
-                            <p class="text-sm font-extrabold text-slate-100 whitespace-nowrap">Po - Pá: 8:00 - 16:00</p>
-                        </div>
-                        <div class="space-y-1.5 text-slate-400 pt-2 border-t border-slate-800/60 max-w-[160px]">
-                            <div class="flex justify-between items-center">
-                                <span>Sobota:</span>
-                                <span
-                                    class="text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded text-[10px] tracking-wider">ZAVŘENO</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span>Neděle:</span>
-                                <span
-                                    class="text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded text-[10px] tracking-wider">ZAVŘENO</span>
-                            </div>
-                        </div>
+                <div class="w-full lg:w-96 relative">
+                    <input type="text" id="blog-search" placeholder="Hledat téma (např. brzdy, olej, plasty)..." class="w-full bg-white border border-slate-200 rounded-xl px-5 py-3.5 pl-12 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm">
+                    <div class="absolute left-4 top-4 text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
                     </div>
                 </div>
-
-                <div class="space-y-4">
-                    <div class="border-l-2 border-blue-500 pl-3">
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest">Kontaktujte nás</h4>
-                    </div>
-                    <ul class="space-y-3 text-xs">
-                        <li>
-                            <span
-                                class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-0.5">E-mailová
-                                adresa</span>
-                            <a href="mailto:info@autotriovicha.cz"
-                                class="text-slate-300 hover:text-blue-400 font-semibold text-xs block transition-colors truncate whitespace-nowrap">
-                                info@autotriovicha.cz
-                            </a>
-                        </li>
-                        <li>
-                            <span
-                                class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-0.5">Telefonní
-                                kontakt</span>
-                            <a href="tel:+420731174681"
-                                class="text-blue-400 hover:text-blue-300 font-black text-base tracking-wide transition-colors block whitespace-nowrap">
-                                +420 731 174 681
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="border-l-2 border-blue-500 pl-3">
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest">Kde nás najdete</h4>
-                    </div>
-                    <address class="text-xs text-slate-400 not-italic space-y-3">
-                        <div>
-                            <span
-                                class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-0.5">Ulice
-                                a číslo</span>
-                            <span class="block font-bold text-slate-200 text-sm whitespace-nowrap">K Ochozi 1425</span>
-                        </div>
-                        <div>
-                            <span
-                                class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-0.5">Město
-                                a PSČ</span>
-                            <span class="block text-slate-300 whitespace-nowrap">Bystřice nad Pernštejnem</span>
-                            <span class="block text-blue-400 font-extrabold tracking-widest text-[11px] mt-0.5">593
-                                01</span>
-                        </div>
-                    </address>
-                </div>
-
             </div>
 
-            <div
-                class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 font-medium">
-                <p>&copy; 2026 Autotrio Vícha s.r.o. Všechna práva vyhrazena.</p>
+            <div class="flex flex-wrap items-center gap-2 mb-10 overflow-x-auto pb-2">
+                <button data-category="all" class="category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10">
+                    Všechny příspěvky
+                </button>
+                <button data-category="rady" class="category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100">
+                    Rady a Tipy
+                </button>
+                <button data-category="dilna" class="category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100">
+                    Z naší dílny
+                </button>
+                <button data-category="technologie" class="category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100">
+                    Technologie
+                </button>
+            </div>
 
-                <div class="flex items-center gap-5">
-                    <span class="text-[10px] text-slate-600 font-bold uppercase tracking-widest block">Sledujte nás</span>
-                    <div class="flex items-center gap-4 text-slate-400">
-                        <a href="https://facebook.com/PLACEHOLDER_FB" target="_blank" rel="noopener noreferrer"
-                            class="hover:text-blue-500 transition-colors" aria-label="Facebook">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                            </svg>
-                        </a>
-                        <a href="https://instagram.com/PLACEHOLDER_IG" target="_blank" rel="noopener noreferrer"
-                            class="hover:text-blue-400 transition-colors" aria-label="Instagram">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                            </svg>
-                        </a>
+            <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm p-5 space-y-4 animate-skeleton">
+                    <div class="bg-slate-200 aspect-video rounded-xl w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-1/4"></div>
+                    <div class="h-6 bg-slate-200 rounded w-3/4"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                        <div class="h-4 bg-slate-200 rounded w-5/6"></div>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm p-5 space-y-4 animate-skeleton">
+                    <div class="bg-slate-200 aspect-video rounded-xl w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+                    <div class="h-6 bg-slate-200 rounded w-1/2"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                        <div class="h-4 bg-slate-200 rounded w-4/5"></div>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm p-5 space-y-4 animate-skeleton">
+                    <div class="bg-slate-200 aspect-video rounded-xl w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-1/4"></div>
+                    <div class="h-6 bg-slate-200 rounded w-2/3"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                        <div class="h-4 bg-slate-200 rounded w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+
+    <div id="article-modal" class="fixed inset-0 z-50 hidden bg-slate-950/50 modal-backdrop-blur flex items-center justify-center p-2 sm:p-4" onclick="handleModalBackdropClick(event)">
+        
+        <div id="modal-inner" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-3xl w-full max-h-[88vh] overflow-y-auto relative shadow-2xl transition-all duration-300 transform scale-95 opacity-0 flex flex-col">
+            
+            <div class="sticky top-0 left-0 w-full h-1.5 bg-slate-100 dark:bg-slate-800 z-50">
+                <div id="scroll-progress" class="h-full bg-blue-600 w-0 transition-all duration-75"></div>
+            </div>
+
+            <div class="sticky top-0 w-full flex justify-between items-center px-5 py-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-40 border-b border-slate-100 dark:border-slate-800/60">
+                
+                <div class="flex items-center gap-2">
+                    <span id="modal-reading-time" class="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-700/40"></span>
+                    <span id="modal-category-badge" class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/30"></span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleModalTheme()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl border border-slate-200/40 dark:border-slate-700/40 cursor-pointer transition-colors" title="Přepnout tmavý režim čtení">
+                        <svg id="theme-icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path>
+                        </svg>
+                        <svg id="theme-icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 118.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl transition-all font-black text-[11px] uppercase tracking-wider cursor-pointer inline-flex items-center gap-2 border border-slate-200/20 dark:border-slate-700/20">
+                        Zavřít 
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 transition-colors duration-200">
+                <article id="modal-content" class="p-6 sm:p-12 text-slate-800 dark:text-slate-200 prose prose-slate dark:prose-invert prose-custom prose-headings:uppercase prose-headings:font-black prose-headings:tracking-tight prose-h1:text-3xl sm:prose-h1:text-4xl prose-h1:text-slate-900 dark:prose-h1:text-white prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:text-slate-900 dark:prose-h2:text-white prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-p:mb-6 prose-li:text-slate-600 dark:prose-li:text-slate-300 prose-ul:list-disc prose-ul:pl-5 max-w-none focus:outline-none">
+                    </article>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 dark:border-slate-800 pb-5">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Líbí se vám článek? Sdílejte ho:</span>
+                    <div class="flex items-center gap-2">
+                        <button id="copy-link-btn" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-3.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+                            <span id="copy-btn-text">Kopírovat odkaz</span>
+                        </button>
                     </div>
                 </div>
 
+                <div>
+                    <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4">Mohlo by vás dál zajímat:</h4>
+                    <div id="modal-related-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <footer class="bg-slate-900 border-t border-slate-950 text-slate-400 pt-16 pb-12 select-none">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="border-b border-slate-800 pb-12 mb-16 text-center">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-6">Oficiální techničtí partneři servisu:</span>
+                <div class="flex flex-wrap justify-center items-center gap-12 lg:gap-20">
+                    <a href="https://odemceniauta.cz" target="_blank" rel="noopener noreferrer" class="opacity-40 hover:opacity-100 transition-opacity max-w-[160px] block">
+                        <img src="public/odemceniautacz.png" alt="OdemčeníAuta.cz" class="h-8 w-auto object-contain brightness-0 invert">
+                    </a>
+                    <a href="https://zariveauto.cz" target="_blank" rel="noopener noreferrer" class="opacity-40 hover:opacity-100 transition-opacity max-w-[160px] block">
+                        <img src="public/zariveautocz.png" alt="ZářivéAuto.cz" class="h-8 w-auto object-contain brightness-0 invert">
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div class="space-y-4">
+                    <span class="text-base font-black uppercase tracking-tight text-white block">AUTOTRIO <span class="text-blue-500">VÍCHA</span></span>
+                    <p class="text-xs text-slate-400 leading-relaxed max-w-xs">
+                        Náš tým proškolených automechaniků zajišťuje precizní servis, diagnostiku, opravy motorů, brzd a kompletní autolakýrnické práce.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div class="border-l-2 border-blue-500 pl-3"><h4 class="text-xs font-black text-white uppercase tracking-widest">Otevírací doba</h4></div>
+                    <div class="text-xs space-y-2">
+                        <p class="font-extrabold text-slate-200">Pondělí - Pátek: 8:00 - 16:00</p>
+                        <p class="text-slate-500 font-semibold">Sobota, Neděle: Zavřeno</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="border-l-2 border-blue-500 pl-3"><h4 class="text-xs font-black text-white uppercase tracking-widest">Rychlý kontakt</h4></div>
+                    <div class="text-xs space-y-2">
+                        <a href="tel:+420731174681" class="text-blue-400 hover:text-blue-300 font-black text-base block transition-colors">+420 731 174 681</a>
+                        <a href="mailto:info@autotriovicha.cz" class="text-slate-400 hover:text-slate-200 font-medium block transition-colors truncate">info@autotriovicha.cz</a>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="border-l-2 border-blue-500 pl-3"><h4 class="text-xs font-black text-white uppercase tracking-widest">Adresa dílny</h4></div>
+                    <p class="text-xs leading-relaxed text-slate-300 font-bold">
+                        K Ochozi 1425<br>
+                        Bystřice nad Pernštejnem, 593 01
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+                <p>&copy; 2026 Autotrio Vícha s.r.o. Všechna práva vyhrazena.</p>
+                <div class="flex items-center gap-4">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 transition-colors">Facebook</a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="hover:text-blue-400 transition-colors">Instagram</a>
+                </div>
             </div>
 
         </div>
     </footer>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
-        const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
+    // Globální stav aplikace pro uložení načtených dat
+    let MasterClankyArray = [];
+    let AktuálníFiltrKategorie = 'all';
+    let AktuálníHledanýText = '';
+    let AktuálníOtevřenýSlug = '';
+
+    // Pomocný rozbor parametrů Frontmatter hlavičky z Markdown souboru
+    function parseFrontmatterLine(line) {
+        const trimmed = line.trim();
+        const separatorIndex = trimmed.indexOf(':');
+        if (separatorIndex === -1) return { key: null, value: null };
+        const key = trimmed.slice(0, separatorIndex).trim();
+        let value = trimmed.slice(separatorIndex + 1).trim();
+        value = value.replace(/^["']|["']$/g, ''); 
+        return { key, value };
+    }
+
+    // Bezpečné oddělení konfiguračních meta dat od textového těla článku
+    function splitFrontmatter(rawText) {
+        const text = rawText.replace(/\r\n/g, '\n');
+        const boundary = /^---\s*$/m;
+        const startPos = text.search(boundary);
+        if (startPos === -1) return { meta: '', body: text };
+        const afterStart = text.indexOf('\n', startPos) + 1;
+        const endPos = text.slice(afterStart).search(boundary);
+        if (endPos === -1) return { meta: '', body: text };
+        const metaBlockEnd = afterStart + endPos;
+        const meta = text.slice(afterStart, metaBlockEnd);
+        const body = text.slice(text.indexOf('\n', metaBlockEnd) + 1);
+        return { meta, body };
+    }
+
+    // Extrakce konkrétního parametru z meta dat článku
+    function getMetaValue(metaString, targetKey, defaultValue = '') {
+        const lines = metaString.split('\n');
+        let result = defaultValue;
+        lines.forEach(line => {
+            const { key, value } = parseFrontmatterLine(line);
+            if (key === targetKey && value) {
+                result = value;
+            }
+        });
+        return result;
+    }
+
+    // Hlavní asynchronní načtení datové brány JSON
+    async function startBlogEngine() {
+        try {
+            const response = await fetch('/clanky.json');
+            if (!response.ok) throw new Error('Chyba komunikace, soubor clanky.json nenalezen.');
+
+            MasterClankyArray = await response.json();
+            
+            // Řazení příspěvků od nejmladšího po nejstarší
+            MasterClankyArray.sort((x, y) => {
+                const { meta: metaX } = splitFrontmatter(x.obsah);
+                const { meta: metaY } = splitFrontmatter(y.obsah);
+                const dateX = Date.parse(getMetaValue(metaX, 'date', '0'));
+                const dateY = Date.parse(getMetaValue(metaY, 'date', '0'));
+                return dateY - dateX;
+            });
+
+            // Vykreslení dat a nastavení listenerů
+            processAndRender();
+            setupInteractions();
+
+        } catch (err) {
+            console.error("Fatal Engine Error:", err);
+            document.getElementById('blog-grid').innerHTML = `
+                <div class="col-span-full text-center py-16 bg-red-50 rounded-2xl border border-red-100 p-6">
+                    <h4 class="text-red-900 font-black uppercase text-sm tracking-wide">Chyba synchronizace databáze</h4>
+                    <p class="text-red-600 text-xs mt-2 font-medium">Nepodařilo se načíst JSON strukturu článků. Zkontrolujte prosím Netlify build bránu.</p>
+                </div>`;
+        }
+    }
+
+    // Sjednocené zpracování filtrů i fulltextu najedvenkrát
+    function processAndRender() {
+        let výsledek = [...MasterClankyArray];
+
+        // 1. Krok: Filtrace podle zvolené kategorie
+        if (AktuálníFiltrKategorie !== 'all') {
+            výsledek = výsledek.filter(item => {
+                const { meta } = splitFrontmatter(item.obsah);
+                const kats = getMetaValue(meta, 'categories', 'rady').toLowerCase();
+                return kats.includes(AktuálníFiltrKategorie);
             });
         }
+
+        // 2. Krok: Filtrace podle zadaného hledaného řetězce
+        if (AktuálníHledanýText) {
+            výsledek = výsledek.filter(item => {
+                const { meta, body } = splitFrontmatter(item.obsah);
+                const title = getMetaValue(meta, 'title', '').toLowerCase();
+                const desc = getMetaValue(meta, 'description', '').toLowerCase();
+                return title.includes(AktuálníHledanýText) || 
+                       desc.includes(AktuálníHledanýText) || 
+                       body.toLowerCase().includes(AktuálníHledanýText);
+            });
+        }
+
+        renderGrid(výsledek);
+    }
+
+    // Fyzické vykreslení karet na stránku
+    function renderGrid(clanky) {
+        const grid = document.getElementById('blog-grid');
+        grid.innerHTML = '';
+
+        if (clanky.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-20 bg-white border border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center">
+                    <div class="text-slate-300 mb-4">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <h3 class="text-slate-900 font-black uppercase text-sm tracking-wide">Nenalezen žádný výsledek</h3>
+                    <p class="text-slate-500 text-xs mt-1 max-w-xs">Zkuste prosím změnit hledané slovo nebo přepnout na jinou kategorii příspěvků.</p>
+                    <button onclick="resetFiltersAndSearch()" class="mt-4 px-4 py-2 text-xs font-black uppercase bg-slate-100 text-slate-800 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer border border-slate-200/40">Zobrazit vše</button>
+                </div>`;
+            return;
+        }
+
+        clanky.forEach(item => {
+            const { meta } = splitFrontmatter(item.obsah);
+            
+            let title = getMetaValue(meta, 'title', 'Bez názvu');
+            let desc = getMetaValue(meta, 'description', 'Kliknutím otevřete celý příspěvek.');
+            let image = getMetaValue(meta, 'image', 'public/hero3.jpg');
+            let dateRaw = getMetaValue(meta, 'date', '');
+            let rawCat = getMetaValue(meta, 'categories', 'rady');
+
+            if (image && image.startsWith('/img/')) {
+                image = 'public' + image;
+            } else if (!image || image === 'undefined' || image === 'null') {
+                image = 'public/hero3.jpg';
+            }
+
+            const date = dateRaw ? new Date(dateRaw).toLocaleDateString('cs-CZ') : new Date().toLocaleDateString('cs-CZ');
+            const friendlyCategory = translateCategory(rawCat);
+            const safeTitle = title.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+            const card = document.createElement('div');
+            card.className = "group bg-white border border-slate-200/60 rounded-2xl overflow-hidden hover:border-blue-500/40 hover:shadow-premium hover:-translate-y-1 transform transition-all duration-300 flex flex-col justify-between";
+            card.innerHTML = `
+                <div>
+                    <div class="relative aspect-video overflow-hidden bg-slate-100 select-none">
+                        <img src="${image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" onerror="this.src='public/hero3.jpg'">
+                        <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md border border-slate-700/40 text-[9px] font-black uppercase tracking-wider text-white px-2.5 py-1 rounded-lg">${friendlyCategory}</span>
+                    </div>
+                    <div class="p-6 sm:p-7">
+                        <div class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>${date}
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors duration-150 line-clamp-2 leading-snug">${safeTitle}</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-3 leading-relaxed line-clamp-3 font-normal">${desc}</p>
+                    </div>
+                </div>
+                <div class="p-6 sm:p-7 pt-0">
+                    <button data-slug="${encodeURIComponent(item.slug)}" class="btn-trigger-modal w-full inline-flex items-center justify-center gap-2 text-[11px] font-black text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition-colors duration-200 cursor-pointer bg-slate-50 group-hover:bg-blue-50 border border-slate-200 group-hover:border-blue-200/60 px-4 py-3 rounded-xl">
+                        Otevřít článek 
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform text-slate-400 group-hover:text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </button>
+                </div>`;
+
+            card.querySelector('.btn-trigger-modal').addEventListener('click', function() {
+                openArticle(decodeURIComponent(this.dataset.slug));
+            });
+
+            grid.appendChild(card);
+        });
+    }
+
+    // Překladač interních kategorií z CMS na klientský text
+    function translateCategory(raw) {
+        const cat = raw.toLowerCase();
+        if (cat.includes('dilna')) return 'Z naší dílny';
+        if (cat.includes('technologie')) return 'Technologie';
+        return 'Rady a tipy';
+    }
+
+    // Výpočet odhadovaného času pro pohodlné čtení
+    function getEstimateReadingTime(text) {
+        const wordsPerMin = 185;
+        const cleanText = text.replace(/[#*`_\[\]()]/g, '');
+        const count = cleanText.split(/\s+/).filter(w => w.length > 0).length;
+        const min = Math.ceil(count / wordsPerMin);
+        return min === 1 ? '⏱️ Čtení: 1 min.' : `⏱️ Čtení: ${min} min.`;
+    }
+
+    // OTEVŘENÍ UPRAVENÉHO MODÁLNÍHO OKNA (UX SPECIALIST LOOK)
+    function openArticle(slug) {
+        const modal = document.getElementById('article-modal');
+        const modalInner = document.getElementById('modal-inner');
+        const content = document.getElementById('modal-content');
+        
+        const item = MasterClankyArray.find(c => c.slug === slug);
+        if (!item) return;
+
+        AktuálníOtevřenýSlug = slug;
+
+        // Reset stavů
+        document.getElementById('scroll-progress').style.width = '0%';
+        modalInner.scrollTop = 0;
+
+        const { meta, body } = splitFrontmatter(item.obsah);
+        
+        // Vyplnění parametrů do horní stavové lišty
+        document.getElementById('modal-reading-time').innerText = getEstimateReadingTime(body);
+        document.getElementById('modal-category-badge').innerText = translateCategory(getMetaValue(meta, 'categories', 'rady'));
+        
+        // Render titulku a těla z Markdownu dohromady
+        const titleRaw = getMetaValue(meta, 'title', 'Bez názvu');
+        const formattedHTML = `<h1>${titleRaw}</h1>${marked.parse(body)}`;
+        content.innerHTML = formattedHTML;
+
+        // Render doporučených souvisejících článků
+        renderRelatedArticles(slug, getMetaValue(meta, 'categories', 'rady'));
+
+        // Reset textu sdílení
+        document.getElementById('copy-btn-text').innerText = 'Kopírovat odkaz';
+
+        // Aktivace animací
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
+        setTimeout(() => {
+            modal.classList.add('active');
+            modalInner.classList.remove('scale-95', 'opacity-0');
+            modalInner.classList.add('scale-100', 'opacity-100');
+        }, 15);
+
+        // Progress bar logika scrollu
+        modalInner.onscroll = function() {
+            const space = modalInner.scrollHeight - modalInner.clientHeight;
+            if (space > 0) {
+                const progress = (modalInner.scrollTop / space) * 100;
+                document.getElementById('scroll-progress').style.width = progress + '%';
+            }
+        };
+    }
+
+    // CHYTRÉ DOPORUČENÍ SOUVISEJÍCÍCH ČLÁNKŮ
+    function renderRelatedArticles(currentSlug, currentRawCategory) {
+        const relatedGrid = document.getElementById('modal-related-grid');
+        relatedGrid.innerHTML = '';
+
+        // Vybereme články ze stejné kategorie, vyjma toho otevřeného
+        let matches = MasterClankyArray.filter(c => c.slug !== currentSlug && splitFrontmatter(c.obsah).meta.toLowerCase().includes(currentRawCategory.toLowerCase()));
+        
+        // Pokud nemáme dostatek zápisů, doplníme jakýmikoliv jinými články
+        if (matches.length < 2) {
+            const extra = MasterClankyArray.filter(c => c.slug !== currentSlug && !matches.some(m => m.slug === c.slug));
+            matches = [...matches, ...extra];
+        }
+
+        // Vezmeme maximálně top 2 články na doporučení
+        const finalSelection = matches.slice(0, 2);
+
+        if (finalSelection.length === 0) {
+            relatedGrid.innerHTML = `<p class="text-slate-400 text-[11px] font-medium italic">Zatím žádné další související články.</p>`;
+            return;
+        }
+
+        finalSelection.forEach(clanek => {
+            const { meta } = splitFrontmatter(clanek.obsah);
+            const title = getMetaValue(meta, 'title', 'Další článek');
+            const safeTitle = title.replace(/"/g, '&quot;');
+            
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 rounded-xl hover:border-blue-500/40 dark:hover:border-blue-500/40 hover:bg-blue-50/20 dark:hover:bg-blue-950/10 transition-all cursor-pointer flex flex-col justify-between group";
+            btn.innerHTML = `
+                <span class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Přečtěte si také</span>
+                <span class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1 leading-tight">${safeTitle}</span>
+            `;
+            
+            btn.onclick = () => {
+                // Zavřeme stávající pohled a plynule skočíme na nový článek
+                openArticle(clanek.slug);
+            };
+            
+            relatedGrid.appendChild(btn);
+        });
+    }
+
+    // BEZPEČNÉ ZAVŘENÍ MODÁLNÍHO OKNA S PODPOROU TRANZICÍ
+    function closeModal() {
+        const modal = document.getElementById('article-modal');
+        const modalInner = document.getElementById('modal-inner');
+
+        if (!modal || modal.classList.contains('hidden')) return;
+
+        modalInner.classList.remove('scale-100', 'opacity-100');
+        modalInner.classList.add('scale-95', 'opacity-0');
+        modal.classList.remove('active');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 350);
+    }
+
+    // PŘEPÍNAČ TEMNÉHO VZHLEDU PRO REŽIM ČTENÍ (DARK MODE MODALU)
+    function toggleModalTheme() {
+        const modalInner = document.getElementById('modal-inner');
+        const sun = document.getElementById('theme-icon-sun');
+        const moon = document.getElementById('theme-icon-moon');
+        
+        modalInner.classList.toggle('dark');
+        
+        if (modalInner.classList.contains('dark')) {
+            sun.classList.remove('hidden');
+            moon.classList.add('hidden');
+        } else {
+            sun.classList.add('hidden');
+            moon.classList.remove('hidden');
+        }
+    }
+
+    // Resetování filtrů z chybového hlášení
+    function resetFiltersAndSearch() {
+        document.getElementById('blog-search').value = '';
+        AktuálníHledanýText = '';
+        AktuálníFiltrKategorie = 'all';
+        
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            if (btn.dataset.category === 'all') {
+                btn.className = "category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10";
+            } else {
+                btn.className = "category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100";
+            }
+        });
+
+        processAndRender();
+    }
+
+    // Zapojení vstupních listenerů vyhledávání a kliků
+    function setupInteractions() {
+        // Vyhledávací pole
+        document.getElementById('blog-search').addEventListener('input', (e) => {
+            AktuálníHledanýText = e.target.value.toLowerCase().trim();
+            processAndRender();
+        });
+
+        // Tlačítka kategorií
+        const btns = document.querySelectorAll('.category-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                btns.forEach(b => {
+                    b.className = "category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100";
+                });
+                
+                this.className = "category-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10";
+                AktuálníFiltrKategorie = this.dataset.category;
+                processAndRender();
+            });
+        });
+
+        // Kopírování odkazu článku pro sdílení
+        document.getElementById('copy-link-btn').onclick = function() {
+            const dummyURL = window.location.origin + window.location.pathname + '?article=' + encodeURIComponent(AktuálníOtevřenýSlug);
+            navigator.clipboard.writeText(dummyURL).then(() => {
+                document.getElementById('copy-btn-text').innerText = '✓ Odkaz zkopírován!';
+            }).catch(() => {
+                document.getElementById('copy-btn-text').innerText = 'Chyba kopírování';
+            });
+        };
+    }
+
+    // Bezpečný klik na tmavé pozadí modálu zavře okno
+    function handleModalBackdropClick(event) {
+        if (event.target === document.getElementById('article-modal')) closeModal();
+    }
+
+    // Detekce klávesy ESC pro rychlé opuštění modálu
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Mobilní responzivní menu toggle
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenuBlock = document.getElementById('mobile-menu');
+    if (mobileBtn && mobileMenuBlock) {
+        mobileBtn.addEventListener('click', () => {
+            mobileMenuBlock.classList.toggle('hidden');
+        });
+    }
+
+    // Automatický start jádra po načtení dokumentu
+    document.addEventListener('DOMContentLoaded', startBlogEngine);
     </script>
 </body>
 
