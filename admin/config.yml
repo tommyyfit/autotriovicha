@@ -1,24 +1,10 @@
-# ─────────────────────────────────────────────────────────────
-# Decap CMS – konfigurace pro Cloudflare Pages + GitHub OAuth
-# ─────────────────────────────────────────────────────────────
-#
-# PŘED NASAZENÍM vyplň:
-#   1. base_url níže → URL tvého OAuth Workeru (viz worker/oauth-worker.js)
-#   2. repo → tvůj GitHub nick/název-repozitáře
-#
-# local_backend: true  ← odkomentuj POUZE pro lokální vývoj (npx decap-server)
-# local_backend: true
-
 backend:
-  name: github
-  repo: PLACEHOLDER_GITHUB_USER/autotriovicha   # ← SEM: tvůj-nick/nazev-repo
+  name: git-gateway
   branch: main
-  base_url: https://PLACEHOLDER_WORKER_URL       # ← SEM: URL Cloudflare Workeru
-  auth_endpoint: /callback
 
 # Kam se ukládají obrázky nahrané v CMS
-media_folder: "public/img/blog"
-public_folder: "/public/img/blog"
+media_folder: "public"
+public_folder: "/public"
 
 # Zobrazení v editoru
 locale: cs
@@ -29,33 +15,11 @@ collections:
     label_singular: "Článek"
     folder: "blog"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"   # Soubory budou: 2025-06-01-nazev-clanku.md
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "blog.html"
     fields:
-      - label: "Nadpis článku"
-        name: "title"
-        widget: "string"
-        hint: "Krátký, výstižný nadpis. Zobrazí se na kartě i v okně článku."
-
-      - label: "Datum publikace"
-        name: "date"
-        widget: "datetime"
-        date_format: "YYYY-MM-DD"
-        time_format: false
-        default: ""
-
-      - label: "Stručný popis (Perex na kartu)"
-        name: "description"
-        widget: "text"
-        hint: "1–2 věty. Zobrazí se pod nadpisem na kartě blogu."
-
-      - label: "Hlavní obrázek"
-        name: "image"
-        widget: "image"
-        required: false
-        hint: "Doporučená velikost: 1200×630 px. Pokud nevyplníš, použije se výchozí foto servisu."
-
-      - label: "Obsah článku"
-        name: "body"
-        widget: "markdown"
-        hint: "Piš normálně — tučné, nadpisy, odrážky fungují tlačítky nahoře."
+      - { label: "Nadpis článku", name: "title", widget: "string" }
+      - { label: "Datum publikace", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Stručný popis", name: "description", widget: "text" }
+      - { label: "Hlavní obrázek", name: "image", widget: "image", required: false }
+      - { label: "Obsah článku", name: "body", widget: "markdown" }
