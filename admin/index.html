@@ -4,41 +4,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrace Blogu</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    
     <script>
-      // 1. Inicializace a kontrola přihlášení / přesměrování
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
+        // Úplně přeskočíme nefunkční widget a ověříme uživatele přímo proti Netlify API
+        if (sessionStorage.getItem("cms_auth") !== "true") {
+            let email = prompt("Zadejte e-mail:");
+            let password = prompt("Zadejte heslo:");
+
+            // Tady se posílá požadavek přímo na tvůj Netlify Identity server
+            fetch("https://lucent-ganache-d3e692.netlify.app/.netlify/identity/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `grant_type=password&username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            })
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                }
+                throw new Error();
+            })
+            .then(data => {
+                // Heslo je správné, uložíme token do paměti pro Decap CMS
+                localStorage.setItem("netlify-cms-user", JSON.stringify({ backendName: "git-gateway", token: data.access_token }));
+                sessionStorage.setItem("cms_auth", "true");
+                window.location.reload();
+            })
+            .catch(() => {
+                alert("Nesprávný e-mail nebo heslo!");
+                window.location.href = "/";
             });
-          }
-        });
-
-        // Přesměrování při odhlášení zpět na hlavní stránku administrace
-        window.netlifyIdentity.on("logout", () => {
-          document.location.href = "/admin/";
-        });
-      }
-
-      // 2. BRUTÁLNÍ FIX PRO LINKY Z E-MAILU (Invite / Reset hesla)
-      // Pokud URL obsahuje token z e-mailu, okamžitě natvrdo otevřeme přihlašovací okno
-      document.addEventListener("DOMContentLoaded", () => {
-        const hash = window.location.hash;
-        if (hash && (hash.includes("invite_token") || hash.includes("recovery_token"))) {
-          // Krátká pauza, aby se stihl widget inicializovat v DOMu
-          setTimeout(() => {
-            if (window.netlifyIdentity) {
-              window.netlifyIdentity.open();
-            }
-          }, 500);
         }
-      });
     </script>
+
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </body>
 </html>
