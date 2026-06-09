@@ -1,0 +1,62 @@
+/* Globální úprava admin pozadí a písma */
+body {
+  background-color: #f1f5f9 !important;
+}
+
+/* Úprava editačních polí (skrytí ošklivých šedých lišt) */
+.css-11oz9v7-ControlPaneContainer {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  padding: 24px !important;
+  border: 1px solid #e2e8f0 !important;
+  margin-bottom: 24px !important;
+}
+
+/* Horní lišta s labelem */
+.css-839g74-ControlLabel {
+  background-color: transparent !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+  border: none !important;
+}
+
+/* Samotné inputy a textarey */
+input[type="text"], textarea, .css-w77b3-GridControl {
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  background-color: #f8fafc !important;
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+  color: #1e293b !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+input[type="text"]:focus, textarea:focus {
+  border-color: #2563eb !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  outline: none !important;
+}
+
+/* Vizuální oddělovače z config.yml (ty hidden sekce s čárou) */
+.css-14v0ic8-FieldHint {
+  color: #3b82f6 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Hlavní tlačítko Publikovat */
+.css-12shm1a-Toolbar-button-btn-text-btn-success {
+  background-color: #2563eb !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  transition: background 0.2s !important;
+}
+.css-12shm1a-Toolbar-button-btn-text-btn-success:hover {
+  background-color: #1d4ed8 !important;
+}
