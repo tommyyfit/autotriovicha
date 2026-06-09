@@ -6,7 +6,7 @@ backend:
 media_folder: "public/img/blog"
 public_folder: "/img/blog"
 
-# Nastavení editoru
+# Globální nastavení editoru pro dokonalý klientský zážitek
 locale: cs
 show_preview_links: false
 slug:
@@ -16,23 +16,36 @@ slug:
 
 collections:
   - name: "blog"
-    label: "✍️ Články na blogu"
-    label_singular: "Článek"
+    label: "✍️ Správa článků"
+    label_singular: "Nový článek"
     folder: "blog"
     create: true
     format: "frontmatter"
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     
-    # Přehledná tabulka v administraci
-    summary: "{{title}} ({{date}})"
+    # Luxusní přehled v administraci (Zobrazí fotku, název, kategorii a datum)
+    summary: "{{title}} | 📅 {{date}} | 📂 {{category}}"
     sortable_fields: ["date", "title"]
+    view_filters:
+      - label: "Pouze Rady a tipy"
+        field: category
+        pattern: "Rady a tipy"
+      - label: "Pouze Z naší dílny"
+        field: category
+        pattern: "Z naší dílny"
 
     fields:
+      # --- SEKCE 1: HLAVNÍ METADATA ---
+      - label: "📦 ZÁKLADNÍ INFORMACE O ČLÁNKU"
+        name: "meta_section"
+        widget: "hidden"
+        hint: "─────────────────────────────────────────────────────────────────"
+
       - label: "📌 Nadpis článku"
         name: "title"
         widget: "string"
         required: true
-        hint: "Hlavní titulek článku, který upoutá pozornost."
+        hint: "Hlavní titulek článku, který upoutá pozornost na úvodní stránce."
 
       - label: "📅 Datum publikace"
         name: "date"
@@ -41,32 +54,57 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         required: true
+        hint: "Zvolte den, kdy má článek vyjít."
 
-      - label: "📝 Stručný popis (Perex)"
+      - label: "📂 Kategorie článku"
+        name: "category"
+        widget: "select"
+        options: ["Z naší dílny", "Rady a tipy", "Údržba vozidel", "Novinky"]
+        default: "Z naší dílny"
+        required: true
+        hint: "Zařazení článku pro snazší orientaci zákazníků."
+
+      # --- SEKCE 2: VIZUÁL A MARKETING ---
+      - label: "🖼️ VIZUÁLNÍ PREZENTACE"
+        name: "visual_section"
+        widget: "hidden"
+        hint: "─────────────────────────────────────────────────────────────────"
+
+      - label: "📝 Stručný popis (Perex / Výcuc)"
         name: "description"
         widget: "text"
         required: true
-        hint: "Krátké shrnutí (1-2 věty), které se zobrazí na úvodní stránce blogu."
+        hint: "Krátké shrnutí (1 až 2 věty). Zobrazuje se jako úvodní text na kartě článku."
 
-      - label: "🖼️ Hlavní obrázek"
+      - label: "📸 Hlavní úvodní obrázek"
         name: "image"
         widget: "image"
         required: false
         choose_url: false
-        hint: "Doporučený formát: WEBP/JPG. Pokud nevyplníte, použije se výchozí foto."
+        media_library:
+          config:
+            max_file_size: 2000000 # Ochrana proti 10MB fotkám z mobilu (max 2MB)
+        hint: "Ideální formát: horizontální (JPG/WEBP). Systém automaticky nepovolí soubory větší než 2MB kvůli rychlosti webu."
 
-      - label: "📖 Obsah článku"
+      # --- SEKCE 3: SAMOTNÝ OBSAH ---
+      - label: "📖 OBSAH A TEXT ČLÁNKU"
+        name: "content_section"
+        widget: "hidden"
+        hint: "─────────────────────────────────────────────────────────────────"
+
+      - label: "✍️ Text editor"
         name: "body"
         widget: "markdown"
         required: true
         minimal: false
+        editor_components: ["image"] # Umožní panu Víchovi vkládat obrázky přímo doprostřed textu!
         buttons:
           - bold
           - italic
-          - code
           - link
           - heading-two
           - heading-three
           - quote
           - bulleted-list
           - numbered-list
+        hint: "Zde napište samotné tělo článku. Můžete používat nadpisy, tučné písmo a vkládat obrázky přímo do textu."
