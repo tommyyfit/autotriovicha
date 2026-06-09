@@ -4,39 +4,65 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrace Blogu</title>
+    <style>
+        body { font-family: sans-serif; background: #f3f4f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
+        h2 { margin-top: 0; color: #333; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0051a2; }
+        .error { color: red; text-align: center; margin-top: 10px; display: none; }
+    </style>
 </head>
 <body>
-    <script>
-        // Úplně přeskočíme nefunkční widget a ověříme uživatele přímo proti Netlify API
-        if (sessionStorage.getItem("cms_auth") !== "true") {
-            let email = prompt("Zadejte e-mail:");
-            let password = prompt("Zadejte heslo:");
 
-            // Tady se posílá požadavek přímo na tvůj Netlify Identity server
-            fetch("https://lucent-ganache-d3e692.netlify.app/.netlify/identity/token", {
+    <div id="login-form" class="login-box">
+        <h2>Přihlášení do správy</h2>
+        <input type="email" id="email" placeholder="E-mail" required>
+        <input type="password" id="password" placeholder="Heslo" required>
+        <button onclick="login()">Přihlásit se</button>
+        <div id="error-msg" class="error">Nesprávný e-mail nebo heslo!</div>
+    </div>
+
+    <script>
+        // Kontrola, zda už uživatel není bezpečně přihlášený
+        if (sessionStorage.getItem("cms_logged_in") === "true") {
+            document.getElementById("login-form").style.display = "none";
+            nacistCMS();
+        }
+
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorMsg = document.getElementById("error-msg");
+
+            // Bezpečné ověření přímo proti Netlify Identity API
+            fetch("/.netlify/identity/token", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `grant_type=password&username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
             })
             .then(res => {
-                if (res.ok) {
-                    return res.json();
-                }
-                throw new Error();
+                if (!res.ok) throw new Error();
+                return res.json();
             })
             .then(data => {
-                // Heslo je správné, uložíme token do paměti pro Decap CMS
+                // Uložení šifrovaného tokenu, který Decap CMS vyžaduje pro zápis do GitHubu
                 localStorage.setItem("netlify-cms-user", JSON.stringify({ backendName: "git-gateway", token: data.access_token }));
-                sessionStorage.setItem("cms_auth", "true");
-                window.location.reload();
+                sessionStorage.setItem("cms_logged_in", "true");
+                document.getElementById("login-form").style.display = "none";
+                nacistCMS();
             })
             .catch(() => {
-                alert("Nesprávný e-mail nebo heslo!");
-                window.location.href = "/";
+                errorMsg.style.display = "block";
             });
         }
-    </script>
 
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+        function nacistCMS() {
+            const script = document.createElement("script");
+            script.src = "https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js";
+            document.body.appendChild(script);
+        }
+    </script>
 </body>
 </html>
