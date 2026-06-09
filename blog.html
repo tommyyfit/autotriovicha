@@ -165,20 +165,15 @@
 
 <script>
 // ─────────────────────────────────────────────
-// 📝 NASTAVENÍ — vyplň před nasazením na produkci
+// Cache klíč pro sessionStorage (ponecháno pro kompatibilitu)
 // ─────────────────────────────────────────────
-const GITHUB_USER = "tommyyfit"; // ← SEM DOPLŇ svůj GitHub nick
-const GITHUB_REPO = "autotriovicha";           // ← název repozitáře
+const CACHE_KEY = 'blog_files_local';
 
-// ─────────────────────────────────────────────
-// Cache klíč pro sessionStorage (rate limit fix)
-// ─────────────────────────────────────────────
-const CACHE_KEY = `blog_files_${GITHUB_USER}_${GITHUB_REPO}`;
+// Globální proměnná pro uchování načtených článků z JSONu
+let lokalniClanky = [];
 
 // ─────────────────────────────────────────────
 // Bezpečný frontmatter parser
-// Správně zpracuje hodnoty s dvojtečkou v názvu:
-//   title: "Motor: co dělat když kouří"  →  "Motor: co dělat když kouří"
 // ─────────────────────────────────────────────
 function parseFrontmatterLine(line) {
     const trimmed = line.trim();
@@ -186,18 +181,14 @@ function parseFrontmatterLine(line) {
     if (colonIndex === -1) return { key: null, value: null };
     const key = trimmed.slice(0, colonIndex).trim();
     let value = trimmed.slice(colonIndex + 1).trim();
-    // Odstraň úvodní/závěrečné uvozovky (jednoduché i dvojité)
     value = value.replace(/^["']|["']$/g, '');
     return { key, value };
 }
 
 // ─────────────────────────────────────────────
 // Bezpečný frontmatter split
-// Rozdělí jen na první dvě --- hranice,
-// takže --- uvnitř textu článku nerozhodí parsing.
 // ─────────────────────────────────────────────
 function splitFrontmatter(rawText) {
-    // Normalizuj konce řádků
     const text = rawText.replace(/\r\n/g, '\n');
     const delimiter = /^---\s*$/m;
     const first = text.search(delimiter);
@@ -212,64 +203,35 @@ function splitFrontmatter(rawText) {
 }
 
 // ─────────────────────────────────────────────
-// Načtení seznamu článků (s cache proti rate limitu)
+// Načtení seznamu článků z lokálního clanky.json
 // ─────────────────────────────────────────────
 async function loadBlog() {
     const grid = document.getElementById('blog-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Ochrana: placeholder nebyl vyplněn
-    if (GITHUB_USER === 'PLACEHOLDER_GITHUB_USER') {
-        grid.innerHTML = `<p class="text-amber-600 col-span-full text-center font-bold py-12">
-            ⚠️ Vývojářský režim: doplň GITHUB_USER v blog.html před nasazením na produkci.
-        </p>`;
-        return;
-    }
-
     try {
-        // Zkus sessionStorage cache — šetří GitHub API rate limit
-        let mdFiles = null;
-        try {
-            const cached = sessionStorage.getItem(CACHE_KEY);
-            if (cached) mdFiles = JSON.parse(cached);
-        } catch (_) {}
-
-        if (!mdFiles) {
-            const githubUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/blog`;
-            const repoResponse = await fetch(githubUrl);
-
-            if (!repoResponse.ok) {
-                const remaining = repoResponse.headers.get('X-RateLimit-Remaining');
-                if (remaining === '0') {
-                    grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">
-                        Momentálně nelze načíst články (vysoká návštěvnost). Zkuste to prosím za chvíli.
-                    </p>`;
-                } else {
-                    grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">
-                        Články se nepodařilo načíst. Zkuste obnovit stránku.
-                    </p>`;
-                }
-                return;
-            }
-
-            const files = await repoResponse.json();
-            mdFiles = files.filter(file => file.name.endsWith('.md'));
-
-            // Ulož do cache na dobu session
-            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(mdFiles)); } catch (_) {}
+        // Žádné GitHub API! Stáhneme vygenerovaný JSON, který Netlify bezpečně připravilo
+        const response = await fetch('/clanky.json');
+        
+        if (!response.ok) {
+            grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">
+                Články se nepodařilo načíst. Zkuste obnovit stránku.
+            </p>`;
+            return;
         }
 
-        if (mdFiles.length === 0) {
+        lokalniClanky = await response.json();
+
+        if (lokalniClanky.length === 0) {
             grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-12">Zatím jsme nenapsali žádný článek.</p>`;
             return;
         }
 
-        // Seřaď soubory od nejnovějšího (podle názvu souboru nebo načteme metadata)
-        for (const file of mdFiles) {
-            const slug = file.name.replace('.md', '');
-            await renderCard(slug);
-        }
+        // Vykreslíme karty pro všechny uložené články
+        lokalniClanky.forEach(clanek => {
+            renderCard(clanek);
+        });
 
     } catch (error) {
         console.error("Kritická chyba při načítání blogu:", error);
@@ -280,105 +242,91 @@ async function loadBlog() {
 // ─────────────────────────────────────────────
 // Vykreslení jedné karty
 // ─────────────────────────────────────────────
-async function renderCard(slug) {
+function renderCard(clanek) {
     const grid = document.getElementById('blog-grid');
-    try {
-        const response = await fetch(`blog/${slug}.md`);
-        if (!response.ok) return;
-        const rawText = await response.text();
+    
+    const { meta } = splitFrontmatter(clanek.obsah);
+    const metadataLines = meta.split('\n');
 
-        const { meta } = splitFrontmatter(rawText);
-        const metadataLines = meta.split('\n');
+    let title = 'Bez názvu';
+    let description = '';
+    let image = 'public/hero3.jpg';
+    let dateRaw = '';
 
-        let title = 'Bez názvu';
-        let description = '';
-        let image = 'public/hero3.jpg';
-        let dateRaw = '';
+    metadataLines.forEach(line => {
+        const { key, value } = parseFrontmatterLine(line);
+        if (!key) return;
+        if (key === 'title') title = value || 'Bez názvu';
+        else if (key === 'description') description = value || '';
+        else if (key === 'image') image = value || '';
+        else if (key === 'date') dateRaw = value || '';
+    });
 
-        metadataLines.forEach(line => {
-            const { key, value } = parseFrontmatterLine(line);
-            if (!key) return;
-            if (key === 'title') title = value || 'Bez názvu';
-            else if (key === 'description') description = value || '';
-            else if (key === 'image') image = value || '';
-            else if (key === 'date') dateRaw = value || '';
-        });
+    if (!image || image === 'undefined') image = 'public/hero3.jpg';
 
-        if (!image || image === 'undefined') image = 'public/hero3.jpg';
+    const date = dateRaw
+        ? new Date(dateRaw).toLocaleDateString('cs-CZ')
+        : new Date().toLocaleDateString('cs-CZ');
 
-        const date = dateRaw
-            ? new Date(dateRaw).toLocaleDateString('cs-CZ')
-            : new Date().toLocaleDateString('cs-CZ');
+    const safeTitle = title.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const safeSlug = encodeURIComponent(clanek.slug);
 
-        // Escapuj title/description pro bezpečné vložení do HTML atributů
-        const safeTitle = title.replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        const safeSlug = encodeURIComponent(slug);
-
-        const card = document.createElement('div');
-        card.className = "group bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:border-blue-600/50 hover:bg-white transition-all duration-300 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transform";
-        card.innerHTML = `
-            <div>
-                <div class="relative aspect-video overflow-hidden bg-slate-200">
-                    <img src="${image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='public/hero3.jpg'">
-                </div>
-                <div class="p-6">
-                    <div class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">${date}</div>
-                    <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">${safeTitle}</h3>
-                    <p class="text-slate-600 text-sm mt-3 leading-relaxed line-clamp-3">${description}</p>
-                </div>
+    const card = document.createElement('div');
+    card.className = "group bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:border-blue-600/50 hover:bg-white transition-all duration-300 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-1 transform";
+    card.innerHTML = `
+        <div>
+            <div class="relative aspect-video overflow-hidden bg-slate-200">
+                <img src="${image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='public/hero3.jpg'">
             </div>
-            <div class="p-6 pt-0">
-                <button data-slug="${safeSlug}" class="btn-read-article inline-flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition-colors duration-200 cursor-pointer bg-transparent border-0 p-0">
-                    Číst článek <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                </button>
+            <div class="p-6">
+                <div class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">${date}</div>
+                <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">${safeTitle}</h3>
+                <p class="text-slate-600 text-sm mt-3 leading-relaxed line-clamp-3">${description}</p>
             </div>
-        `;
+        </div>
+        <div class="p-6 pt-0">
+            <button data-slug="${safeSlug}" class="btn-read-article inline-flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition-colors duration-200 cursor-pointer bg-transparent border-0 p-0">
+                Číst článek <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </button>
+        </div>
+    `;
 
-        // Event listener místo inline onclick — bezpečnější, nelze dvojkliknout během načítání
-        card.querySelector('.btn-read-article').addEventListener('click', function() {
-            openArticle(decodeURIComponent(this.dataset.slug));
-        });
+    card.querySelector('.btn-read-article').addEventListener('click', function() {
+        openArticle(decodeURIComponent(this.dataset.slug));
+    });
 
-        grid.appendChild(card);
-    } catch (e) {
-        console.error("Chyba při vykreslení karty:", e);
-    }
+    grid.appendChild(card);
 }
 
 // ─────────────────────────────────────────────
-// Otevření článku v modalu
-// Loading state zabraňuje dvojitému kliknutí
+// Otevření článku v modalu (z lokální paměti)
 // ─────────────────────────────────────────────
 let modalIsLoading = false;
 
-async function openArticle(slug) {
-    if (modalIsLoading) return; // Zabrání dvojitému otevření
+function openArticle(slug) {
+    if (modalIsLoading) return;
     modalIsLoading = true;
 
     const modal = document.getElementById('article-modal');
     const content = document.getElementById('modal-content');
 
-    // Zobraz modal hned s loading stavem
-    content.innerHTML = `
-        <div class="flex items-center justify-center py-24 gap-3 text-slate-400">
-            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-            </svg>
-            <span class="text-sm font-bold uppercase tracking-wider">Načítám článek...</span>
-        </div>`;
+    // Najdeme článek v poli, které už máme stažené z clanky.json
+    const clanek = lokalniClanky.find(c => c.slug === slug);
+
+    if (!clanek) {
+        content.innerHTML = `<p class="text-slate-500 text-center py-12">Článek se nepodařilo najít.</p>`;
+        modalIsLoading = false;
+        return;
+    }
+
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
     try {
-        const response = await fetch(`blog/${slug}.md`);
-        if (!response.ok) throw new Error('Článek nenalezen');
-        const rawText = await response.text();
-
-        const { body } = splitFrontmatter(rawText);
+        const { body } = splitFrontmatter(clanek.obsah);
         content.innerHTML = marked.parse(body);
     } catch (error) {
-        content.innerHTML = `<p class="text-slate-500 text-center py-12">Článek se nepodařilo načíst. Zkuste to znovu.</p>`;
+        content.innerHTML = `<p class="text-slate-500 text-center py-12">Chyba při zpracování obsahu článku.</p>`;
         console.error("Nelze otevřít detail článku:", error);
     } finally {
         modalIsLoading = false;
@@ -386,7 +334,7 @@ async function openArticle(slug) {
 }
 
 // ─────────────────────────────────────────────
-// Zavření modalu — vždy obnoví scroll
+// Zavření modalu
 // ─────────────────────────────────────────────
 function closeModal() {
     document.getElementById('article-modal').classList.add('hidden');
@@ -394,14 +342,12 @@ function closeModal() {
     modalIsLoading = false;
 }
 
-// Zavření kliknutím na backdrop (mimo modal-inner)
 function handleModalBackdropClick(event) {
     if (event.target === document.getElementById('article-modal')) {
         closeModal();
     }
 }
 
-// Zavření klávesou Escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
 });
