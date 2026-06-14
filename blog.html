@@ -401,10 +401,23 @@
 
     async function startBlogEngine() {
         try {
-            const response = await fetch('/clanky.json');
-            if (!response.ok) throw new Error('Chyba komunikace, soubor clanky.json nenalezen.');
+            const REPO = 'tommyyfit/autotriovicha';
+            const FOLDER = 'blog';
+            const API = `https://api.github.com/repos/${REPO}/contents/${FOLDER}`;
 
-            MasterClankyArray = await response.json();
+            const listRes = await fetch(API, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+            if (!listRes.ok) throw new Error('Nepodařilo se načíst seznam článků z GitHubu.');
+            const files = await listRes.json();
+
+            const mdFiles = files.filter(f => f.name.endsWith('.md') && f.name !== '.gitkeep');
+
+            const articles = await Promise.all(mdFiles.map(async (file) => {
+                const res = await fetch(file.download_url);
+                const obsah = await res.text();
+                return { slug: file.name.replace('.md', ''), obsah };
+            }));
+
+            MasterClankyArray = articles;
             
             MasterClankyArray.sort((x, y) => {
                 const { meta: metaX } = splitFrontmatter(x.obsah);
