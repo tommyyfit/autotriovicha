@@ -353,17 +353,16 @@
         </div>
     </footer>
 
-
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+
 
     <script>
-    // Globální stav aplikace pro uložení načtených dat
     let MasterClankyArray = [];
     let AktuálníFiltrKategorie = 'all';
     let AktuálníHledanýText = '';
     let AktuálníOtevřenýSlug = '';
 
-    // Pomocný rozbor parametrů Frontmatter hlavičky z Markdown souboru
     function parseFrontmatterLine(line) {
         const trimmed = line.trim();
         const separatorIndex = trimmed.indexOf(':');
@@ -374,7 +373,6 @@
         return { key, value };
     }
 
-    // Bezpečné oddělení konfiguračních meta dat od textového těla článku
     function splitFrontmatter(rawText) {
         const text = rawText.replace(/\r\n/g, '\n');
         const boundary = /^---\s*$/m;
@@ -389,7 +387,6 @@
         return { meta, body };
     }
 
-    // Extrakce konkrétního parametru z meta dat článku
     function getMetaValue(metaString, targetKey, defaultValue = '') {
         const lines = metaString.split('\n');
         let result = defaultValue;
@@ -402,7 +399,6 @@
         return result;
     }
 
-    // Hlavní asynchronní načtení datové brány JSON
     async function startBlogEngine() {
         try {
             const response = await fetch('/clanky.json');
@@ -410,7 +406,6 @@
 
             MasterClankyArray = await response.json();
             
-            // Řazení příspěvků od nejmladšího po nejstarší
             MasterClankyArray.sort((x, y) => {
                 const { meta: metaX } = splitFrontmatter(x.obsah);
                 const { meta: metaY } = splitFrontmatter(y.obsah);
@@ -419,7 +414,6 @@
                 return dateY - dateX;
             });
 
-            // Vykreslení dat a nastavení listenerů
             processAndRender();
             setupInteractions();
 
@@ -433,11 +427,9 @@
         }
     }
 
-    // Sjednocené zpracování filtrů i fulltextu najedvenkrát
     function processAndRender() {
         let výsledek = [...MasterClankyArray];
 
-        // 1. Krok: Filtrace podle zvolené kategorie
         if (AktuálníFiltrKategorie !== 'all') {
             výsledek = výsledek.filter(item => {
                 const { meta } = splitFrontmatter(item.obsah);
@@ -446,7 +438,6 @@
             });
         }
 
-        // 2. Krok: Filtrace podle zadaného hledaného řetězce
         if (AktuálníHledanýText) {
             výsledek = výsledek.filter(item => {
                 const { meta, body } = splitFrontmatter(item.obsah);
@@ -461,7 +452,6 @@
         renderGrid(výsledek);
     }
 
-    // Fyzické vykreslení karet na stránku
     function renderGrid(clanky) {
         const grid = document.getElementById('blog-grid');
         grid.innerHTML = '';
@@ -531,7 +521,6 @@
         });
     }
 
-    // Překladač interních kategorií z CMS na klientský text
     function translateCategory(raw) {
         const cat = raw.toLowerCase();
         if (cat.includes('dilna')) return 'Z naší dílny';
@@ -539,7 +528,6 @@
         return 'Rady a tipy';
     }
 
-    // Výpočet odhadovaného času pro pohodlné čtení
     function getEstimateReadingTime(text) {
         const wordsPerMin = 185;
         const cleanText = text.replace(/[#*`_\[\]()]/g, '');
@@ -548,7 +536,6 @@
         return min === 1 ? '⏱️ Čtení: 1 min.' : `⏱️ Čtení: ${min} min.`;
     }
 
-    // OTEVŘENÍ UPRAVENÉHO MODÁLNÍHO OKNA (UX SPECIALIST LOOK)
     function openArticle(slug) {
         const modal = document.getElementById('article-modal');
         const modalInner = document.getElementById('modal-inner');
@@ -559,28 +546,22 @@
 
         AktuálníOtevřenýSlug = slug;
 
-        // Reset stavů
         document.getElementById('scroll-progress').style.width = '0%';
         modalInner.scrollTop = 0;
 
         const { meta, body } = splitFrontmatter(item.obsah);
         
-        // Vyplnění parametrů do horní stavové lišty
         document.getElementById('modal-reading-time').innerText = getEstimateReadingTime(body);
         document.getElementById('modal-category-badge').innerText = translateCategory(getMetaValue(meta, 'categories', 'rady'));
         
-        // Render titulku a těla z Markdownu dohromady
         const titleRaw = getMetaValue(meta, 'title', 'Bez názvu');
         const formattedHTML = `<h1>${titleRaw}</h1>${marked.parse(body)}`;
-        content.innerHTML = formattedHTML;
+        content.innerHTML = DOMPurify.sanitize(formattedHTML);
 
-        // Render doporučených souvisejících článků
         renderRelatedArticles(slug, getMetaValue(meta, 'categories', 'rady'));
 
-        // Reset textu sdílení
         document.getElementById('copy-btn-text').innerText = 'Kopírovat odkaz';
 
-        // Aktivace animací
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
@@ -591,7 +572,6 @@
             modalInner.classList.add('scale-100', 'opacity-100');
         }, 15);
 
-        // Progress bar logika scrollu
         modalInner.onscroll = function() {
             const space = modalInner.scrollHeight - modalInner.clientHeight;
             if (space > 0) {
@@ -601,21 +581,17 @@
         };
     }
 
-    // CHYTRÉ DOPORUČENÍ SOUVISEJÍCÍCH ČLÁNKŮ
     function renderRelatedArticles(currentSlug, currentRawCategory) {
         const relatedGrid = document.getElementById('modal-related-grid');
         relatedGrid.innerHTML = '';
 
-        // Vybereme články ze stejné kategorie, vyjma toho otevřeného
         let matches = MasterClankyArray.filter(c => c.slug !== currentSlug && splitFrontmatter(c.obsah).meta.toLowerCase().includes(currentRawCategory.toLowerCase()));
         
-        // Pokud nemáme dostatek zápisů, doplníme jakýmikoliv jinými články
         if (matches.length < 2) {
             const extra = MasterClankyArray.filter(c => c.slug !== currentSlug && !matches.some(m => m.slug === c.slug));
             matches = [...matches, ...extra];
         }
 
-        // Vezmeme maximálně top 2 články na doporučení
         const finalSelection = matches.slice(0, 2);
 
         if (finalSelection.length === 0) {
@@ -636,7 +612,6 @@
             `;
             
             btn.onclick = () => {
-                // Zavřeme stávající pohled a plynule skočíme na nový článek
                 openArticle(clanek.slug);
             };
             
@@ -644,7 +619,6 @@
         });
     }
 
-    // BEZPEČNÉ ZAVŘENÍ MODÁLNÍHO OKNA S PODPOROU TRANZICÍ
     function closeModal() {
         const modal = document.getElementById('article-modal');
         const modalInner = document.getElementById('modal-inner');
@@ -662,7 +636,6 @@
         }, 350);
     }
 
-    // PŘEPÍNAČ TEMNÉHO VZHLEDU PRO REŽIM ČTENÍ (DARK MODE MODALU)
     function toggleModalTheme() {
         const modalInner = document.getElementById('modal-inner');
         const sun = document.getElementById('theme-icon-sun');
@@ -679,7 +652,6 @@
         }
     }
 
-    // Resetování filtrů z chybového hlášení
     function resetFiltersAndSearch() {
         document.getElementById('blog-search').value = '';
         AktuálníHledanýText = '';
@@ -696,15 +668,12 @@
         processAndRender();
     }
 
-    // Zapojení vstupních listenerů vyhledávání a kliků
     function setupInteractions() {
-        // Vyhledávací pole
         document.getElementById('blog-search').addEventListener('input', (e) => {
             AktuálníHledanýText = e.target.value.toLowerCase().trim();
             processAndRender();
         });
 
-        // Tlačítka kategorií
         const btns = document.querySelectorAll('.category-btn');
         btns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -718,7 +687,6 @@
             });
         });
 
-        // Kopírování odkazu článku pro sdílení
         document.getElementById('copy-link-btn').onclick = function() {
             const dummyURL = window.location.origin + window.location.pathname + '?article=' + encodeURIComponent(AktuálníOtevřenýSlug);
             navigator.clipboard.writeText(dummyURL).then(() => {
@@ -729,17 +697,14 @@
         };
     }
 
-    // Bezpečný klik na tmavé pozadí modálu zavře okno
     function handleModalBackdropClick(event) {
         if (event.target === document.getElementById('article-modal')) closeModal();
     }
 
-    // Detekce klávesy ESC pro rychlé opuštění modálu
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
     });
 
-    // Mobilní responzivní menu toggle
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileMenuBlock = document.getElementById('mobile-menu');
     if (mobileBtn && mobileMenuBlock) {
@@ -748,7 +713,6 @@
         });
     }
 
-    // Automatický start jádra po načtení dokumentu
     document.addEventListener('DOMContentLoaded', startBlogEngine);
     </script>
 </body>
